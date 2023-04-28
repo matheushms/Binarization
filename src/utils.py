@@ -8,6 +8,10 @@
 from PIL import Image
 import numpy as np
 import os
+from os import listdir
+from os.path import isfile, join
+import matplotlib
+matplotlib.use('TkAgg')
 import cv2
 
 def open_image(path):
@@ -92,8 +96,39 @@ def local_analysis(image, func, window_size = 3, padding_type = 'ZEROS', pad_sha
             
     return buffer
 
+
+def process_folder(dir_path, out_dir_path, func={'func':None, 'args':None}, ext_out = ".png"):
+    func_args = func['args']
+    func = func['func']
+    all_files_path = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+
+    os.makedirs(out_dir_path, exist_ok=True)
+
+    for file_path in all_files_path:
+        img = open_pgm(file_path)
+        result_img = func(img, *func_args)
+        result_img = result_img.astype(np.uint8)*255
+        filename = os.path.basename(file_path)
+        filename = os.path.splitext(filename)[0]
+        out_file_path = os.path.join(out_dir_path, filename)+ext_out
+        cv2.imwrite(out_file_path, result_img)
+
+def convert_to_png(dir_path, out_dir_path,  ext_out = ".png"):
+    all_files_path = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+
+    os.makedirs(out_dir_path, exist_ok=True)
+
+    for file_path in all_files_path:
+        file_path = os.path.join(dir_path,file_path)
+        img = open_pgm(file_path)
+        filename = os.path.basename(file_path)
+        filename = os.path.splitext(filename)[0]
+        out_file_path = os.path.join(out_dir_path, filename)+ext_out
+        cv2.imwrite(out_file_path, img)
+
 import matplotlib.pyplot as plt
 if __name__ == "__main__":
+    convert_to_png("images", "images_png",  ext_out = ".png")
     # img = open_pgm("images/baboon.pgm")
     img = cv2.imread('images/retina.pgm', -1)
     plt.imshow(img)

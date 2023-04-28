@@ -7,7 +7,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import open_image, open_pgm, local_analysis
+from src.utils import open_image, open_pgm, local_analysis
+import matplotlib
+matplotlib.use('TkAgg')
 
 def global_thresholding(img, thr):
     """
@@ -78,7 +80,7 @@ def otsu(img):
         if n_T > n:
             n = n_T
             thr = i
-    print(thr)
+
     return img > thr
 
 
@@ -134,7 +136,7 @@ def niblack(image, window_size = 15, k=-0.2, padding_type = 'ZEROS', pad_shape =
 
 
 
-def sauvola(img, n):
+def sauvola(img, window_size, k=0.5, R=128):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -150,9 +152,16 @@ def sauvola(img, n):
         Binarized image.
         
     """
-    pass
+    def func(window, k, R):
+        mean = np.mean(window)
+        std = np.std(window)
+        t = mean*(1 + k*(std/R -1))
+        return t
+    
+    return local_analysis(img,  {'func':func, 'args':[k, R]}, window_size, padding_type = 'ZEROS', pad_shape = None)
 
-def phansalskar(img, k, R, p, q):
+
+def phansalskar(img, window_size, k=0.25, R=0.5, p=2, q=10):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -168,9 +177,16 @@ def phansalskar(img, k, R, p, q):
         Binarized image.
         
     """
-    pass
+    def func(window):
+        mean = np.mean(window)
+        std = np.std(window)
+        t = mean*(1 + p*np.exp((-q)*mean) + k*(std/R -1))
+        return t
+    
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
 
-def contrast_thresholding(img):
+
+def contrast_thresholding(img, window_size=3):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -186,9 +202,16 @@ def contrast_thresholding(img):
         Binarized image.
         
     """
-    pass
+    def func(window):
+        max = np.max(window)
+        min = np.min(window)
+        t = (max+min) / 2
+        return t
+    
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
 
-def mean_method(img, C):
+
+def mean_method(img, window_size, C):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -204,9 +227,15 @@ def mean_method(img, C):
         Binarized image.
         
     """
-    pass
+    def func(window):
+        mean = np.mean(window)
+        t = mean - C
+        return t
+    
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
 
-def median_method(img):
+
+def median_method(img, window_size):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -222,20 +251,30 @@ def median_method(img):
         Binarized image.
         
     """
-    pass
+    def func(window):
+        median = np.median(window)
+        t = median
+        return t
+    
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+
 
 if __name__ == "__main__":
     img = open_pgm("images/monarch.pgm")
-    #result_img = global_thresholding(img,200)
-    result_img = otsu(img)
-    #result_img = bernsen(img, window_size=5)
-    result_img = niblack(img)
+    result_img = global_thresholding(img,200)
+    # result_img = otsu(img)
+    # result_img = bernsen(img, window_size=5)
+    # result_img = niblack(img)
+    # result_img = sauvola(img, window_size=30, k=0.5, R=128)
+    # result_img = phansalskar(img, window_size=15, k=0.25, R=0.5, p=2, q=10)
+    # result_img = contrast_thresholding(img, window_size=30)
+    # result_img = mean_method(img, window_size=15, C=0)
+    # result_img = median_method(img, window_size=15)
+
     hist, bins = np.histogram(img, bins=list(range(257)),range = (0,256))
     bins = bins[:-1]
     #hist,bins = np.histogram(np.array([1,1,2,3,3,0]), bins = np.arange(5))
 
-    plt.plot(hist)
-    plt.show()
     plt.imshow(result_img, cmap='gray')
     # plt.imshow(result_img, cmap='gray')
     plt.show()
