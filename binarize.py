@@ -61,31 +61,31 @@ def main():
     result_img = None
     img = open_pgm(args.input)
     if args.method == "global" :
-        result_img = global_thresholding(img, args.thr)
+        result_img, _  = global_thresholding(img, args.thr)
 
     elif args.method == "otsu" :
-        result_img = otsu(img)
+        result_img, _  = otsu(img)
 
     elif args.method == "bersen" :
-        result_img = bernsen(img, window_size=args.window_size)
+        result_img, _ = bernsen(img, window_size=args.window_size)
 
     elif args.method == "niblack" :
-        result_img = niblack(img, window_size=args.window_size)
+        result_img, _  = niblack(img, window_size=args.window_size)
 
     elif args.method == "sauvola" :
-        result_img = sauvola(img, window_size=args.window_size, k=args.k, R=args.R)
+        result_img, _  = sauvola(img, window_size=args.window_size, k=args.k, R=args.R)
 
     elif args.method == "phansalkar" :
-        result_img = phansalskar(img, window_size=args.window_size, k=args.k, R=args.R, p=args.p, q=args.q)
+        result_img, _  = phansalskar(img, window_size=args.window_size, k=args.k, R=args.R, p=args.p, q=args.q)
 
     elif args.method == "local_contrast" :
-        result_img = contrast_thresholding(img, window_size=args.window_size)
+        result_img, _  = contrast_thresholding(img, window_size=args.window_size)
 
     elif args.method == "local_mean" :
-        result_img = mean_method(img, window_size=args.window_size, C=args.size)
+        result_img, _  = mean_method(img, window_size=args.window_size, C=args.size)
     
     elif args.method == "local_median" :
-        result_img = median_method(img, window_size=args.window_size)
+        result_img, _  = median_method(img, window_size=args.window_size)
 
     else:
         print("No method specified. Use --help for more information.")

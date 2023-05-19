@@ -27,7 +27,7 @@ def global_thresholding(img, thr):
         Binarized image.
 
     """
-    return (img > thr)
+    return (img > thr), ""
 
 def otsu(img):
     """
@@ -81,7 +81,7 @@ def otsu(img):
             n = n_T
             thr = i
 
-    return img > thr
+    return img > thr, str(thr)
 
 
 
@@ -108,9 +108,9 @@ def bernsen(image, window_size = 3):
         t = (zmin + zmax)/2
         return t
     
-    return local_analysis(image, {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(image, {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None), ""
 
-def niblack(image, window_size = 15, k=-0.2, padding_type = 'ZEROS', pad_shape = None):
+def niblack(image, window_size=15, k=-0.2, padding_type='ZEROS', pad_shape=None):
     """
     Extracts a specific bit-plane from a given grayscale image.
 
@@ -132,7 +132,7 @@ def niblack(image, window_size = 15, k=-0.2, padding_type = 'ZEROS', pad_shape =
         t = mean + k*std
         return t
     
-    return local_analysis(image,  {'func':func, 'args':[k]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(image,  {'func':func, 'args':[k]}, window_size, padding_type = 'ZEROS', pad_shape = None),""
 
 
 
@@ -155,10 +155,10 @@ def sauvola(img, window_size, k=0.5, R=128):
     def func(window, k, R):
         mean = np.mean(window)
         std = np.std(window)
-        t = mean*(1 + k*(std/R -1))
+        t = mean*(1 + k*((std/R) - 1))
         return t
     
-    return local_analysis(img,  {'func':func, 'args':[k, R]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(img,  {'func':func, 'args':[k, R]}, window_size, padding_type = 'ZEROS', pad_shape = None),""
 
 
 def phansalskar(img, window_size, k=0.25, R=0.5, p=2, q=10):
@@ -178,12 +178,13 @@ def phansalskar(img, window_size, k=0.25, R=0.5, p=2, q=10):
         
     """
     def func(window):
+        
         mean = np.mean(window)
         std = np.std(window)
         t = mean*(1 + p*np.exp((-q)*mean) + k*(std/R -1))
         return t
     
-    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None),""
 
 
 def contrast_thresholding(img, window_size=3):
@@ -208,7 +209,7 @@ def contrast_thresholding(img, window_size=3):
         t = (max+min) / 2
         return t
     
-    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None), ""
 
 
 def mean_method(img, window_size, C):
@@ -232,7 +233,7 @@ def mean_method(img, window_size, C):
         t = mean - C
         return t
     
-    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None), ""
 
 
 def median_method(img, window_size):
@@ -256,7 +257,7 @@ def median_method(img, window_size):
         t = median
         return t
     
-    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None)
+    return local_analysis(img,  {'func':func, 'args':[]}, window_size, padding_type = 'ZEROS', pad_shape = None), ""
 
 
 if __name__ == "__main__":

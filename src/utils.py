@@ -105,12 +105,18 @@ def process_folder(dir_path, out_dir_path, func={'func':None, 'args':None}, ext_
     os.makedirs(out_dir_path, exist_ok=True)
 
     for file_path in all_files_path:
+        file_path = os.path.join(dir_path,file_path)
         img = open_pgm(file_path)
-        result_img = func(img, *func_args)
+
+        result_img, str_result = func(img, *func_args)
         result_img = result_img.astype(np.uint8)*255
+
+        num_px_b = np.sum(result_img==0)
+        fp = int(num_px_b *100 / (result_img.shape[0] * result_img.shape[1]))
+
         filename = os.path.basename(file_path)
         filename = os.path.splitext(filename)[0]
-        out_file_path = os.path.join(out_dir_path, filename)+ext_out
+        out_file_path = os.path.join(out_dir_path, filename + f"_fp{fp}_{str_result}")+ext_out
         cv2.imwrite(out_file_path, result_img)
 
 def convert_to_png(dir_path, out_dir_path,  ext_out = ".png"):
@@ -126,11 +132,41 @@ def convert_to_png(dir_path, out_dir_path,  ext_out = ".png"):
         out_file_path = os.path.join(out_dir_path, filename)+ext_out
         cv2.imwrite(out_file_path, img)
 
+def histogram_plot(img, out_path):
+    hist, bins = np.histogram(img, bins=list(range(257)),range = (0,256))
+    plt.figure()
+    plt.title("Grayscale Histogram")
+    plt.xlabel("Bins")
+    plt.ylabel("# of Pixels")
+    plt.plot(hist)
+    plt.xlim([0, 256])
+    plt.savefig(out_path)
+
+
+
+def generate_histograms(dir_path, out_dir_path,  ext_out = ".png"):
+    all_files_path = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+
+    os.makedirs(out_dir_path, exist_ok=True)
+
+    for file_path in all_files_path:
+        file_path = os.path.join(dir_path,file_path)
+        img = open_pgm(file_path)
+        
+        filename = "histo_"+os.path.basename(file_path)
+        filename = os.path.splitext(filename)[0]
+        out_file_path = os.path.join(out_dir_path, filename)+ext_out
+        histogram_plot(img,out_file_path)
+
+
+
 import matplotlib.pyplot as plt
 if __name__ == "__main__":
-    convert_to_png("images", "images_png",  ext_out = ".png")
+    # convert_to_png("images", "images_png",  ext_out = ".png")
+    generate_histograms("images", "images_png",  ext_out = ".png")
     # img = open_pgm("images/baboon.pgm")
     img = cv2.imread('images/retina.pgm', -1)
+    histogram_plot(img, "hist.png")
     plt.imshow(img)
     plt.show()
     hist, bins = np.histogram(img, bins=list(range(256)), range=(0,255))
